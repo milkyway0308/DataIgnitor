@@ -22,6 +22,10 @@ class YamlReader(stream: InputStream) {
             }
         }
 
+        operator fun contains(key: String): Boolean {
+            return key in data
+        }
+
         fun isList(key: String): Boolean {
             return data[key] is YamlList
         }
