@@ -4,7 +4,7 @@ import org.yaml.snakeyaml.Yaml
 import java.io.InputStream
 import kotlin.reflect.KClass
 
-@Suppress("unused", "UNCHECKED_CAST")
+@Suppress("unused", "UNCHECKED_CAST", "MemberVisibilityCanBePrivate")
 class YamlReader(stream: InputStream) {
     val root = YamlSection(Yaml().load(stream))
 
@@ -47,8 +47,12 @@ class YamlReader(stream: InputStream) {
             return isInherited<Number>(key)
         }
 
-        fun <T : Any> get(key: String): T? {
+        fun <T : Any> getRaw(key: String): T? {
             return data[key] as T?
+        }
+
+        operator fun get(key: String): String? {
+            return getRaw<Any>(key)?.toString()
         }
 
         @JvmOverloads
