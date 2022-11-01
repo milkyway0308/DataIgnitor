@@ -32,17 +32,16 @@ object Vector4Loader : SchemaDataLoader<LocationVector<out Number>> {
 
 
     private fun loadFromStream(stream: DataInputStream, schema: YamlReader.YamlSection): LocationVector<out Number> {
-        return if (schema["precision", "single"] == "single") Vector4Double(
-            stream.readDouble(),
-            stream.readDouble(),
-            stream.readDouble(),
-            stream.readDouble()
-        )
-        else Vector4Float(
+        return if (schema["precision", "single"] == "single") Vector4Float(
             stream.readFloat(),
             stream.readFloat(),
             stream.readFloat(),
             stream.readFloat()
+        ) else Vector4Double(
+            stream.readDouble(),
+            stream.readDouble(),
+            stream.readDouble(),
+            stream.readDouble()
         )
     }
 }

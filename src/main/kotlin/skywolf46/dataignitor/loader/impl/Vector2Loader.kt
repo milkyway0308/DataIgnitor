@@ -10,9 +10,7 @@ private const val ALIAS = "aliases"
 
 object Vector2Loader : SchemaDataLoader<LocationVector<out Number>> {
     override fun readStream(
-        stream: DataInputStream,
-        schema: YamlReader.YamlSection,
-        errors: SchemaErrorInfo
+        stream: DataInputStream, schema: YamlReader.YamlSection, errors: SchemaErrorInfo
     ): LocationVector<out Number> {
         if (schema.contains(ALIAS) && schema.isSection(ALIAS)) {
             return loadFromAlias(stream, schema)
@@ -30,13 +28,11 @@ object Vector2Loader : SchemaDataLoader<LocationVector<out Number>> {
 
 
     private fun loadFromStream(stream: DataInputStream, schema: YamlReader.YamlSection): LocationVector<out Number> {
-        return if (schema["precision", "single"] == "single") Vector2Double(
-            stream.readDouble(),
-            stream.readDouble()
+        return if (schema["precision", "single"] == "single") Vector2Float(
+            stream.readFloat(), stream.readFloat()
         )
-        else Vector2Float(
-            stream.readFloat(),
-            stream.readFloat()
+        else Vector2Double(
+            stream.readDouble(), stream.readDouble()
         )
     }
 }
