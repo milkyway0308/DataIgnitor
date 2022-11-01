@@ -2,6 +2,7 @@ package skywolf46.dataignitor.util
 
 import org.yaml.snakeyaml.Yaml
 import java.io.InputStream
+import java.util.StringJoiner
 import kotlin.reflect.KClass
 
 @Suppress("unused", "UNCHECKED_CAST", "MemberVisibilityCanBePrivate")
@@ -55,10 +56,6 @@ class YamlReader(stream: InputStream) {
             return data[key] as T?
         }
 
-        operator fun get(key: String): String? {
-            return getRaw<Any>(key)?.toString()
-        }
-
         @JvmOverloads
         fun getInt(key: String, def: Int = 0): Int {
             return (data[key] as? Number)?.toInt() ?: def
@@ -79,12 +76,29 @@ class YamlReader(stream: InputStream) {
             return (data[key] as? Number)?.toLong() ?: def
         }
 
+        fun getSection(key: String): YamlSection? {
+            return data[key] as? YamlSection
+        }
+
+        fun getList(key: String): YamlList? {
+            return data[key] as? YamlList
+        }
+
         @JvmOverloads
         fun getKeys(deepScan: Boolean = false): List<String> {
             if (!deepScan)
                 return data.keys.toList()
             return data.keys.toList() + data.entries.filter { it.value is YamlSection }
                 .map { (it.value as YamlSection).getKeys(true).map { x -> "${it.key}.$x" } }
+                .flatten()
+        }
+
+        @JvmOverloads
+        fun getEntries(deepScan: Boolean = false): List<Pair<String, Any>> {
+            if (!deepScan)
+                return data.entries.map { (x, y) -> x to y }
+            return data.entries.map { (x, y) -> x to y } + data.entries.filter { it.value is YamlSection }
+                .map { (it.value as YamlSection).getEntries(true).map { x -> "${it.key}.${x.first}" to x.second } }
                 .flatten()
         }
     }
