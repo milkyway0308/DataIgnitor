@@ -13,9 +13,9 @@ object VectorLoader : SchemaDataLoader<LocationVector<out Number>> {
         errors: SchemaErrorInfo
     ): LocationVector<out Number> {
         return when (schema["type"]!!) {
-            "vector4" -> Vector4Loader.readStream(stream, schema,)
-            "vector3" -> Vector3Loader.readStream(stream, schema,)
-            "vector2" -> Vector2Loader.readStream(stream, schema,)
+            "vector4" -> Vector4Loader.readStream(stream, schema, errors)
+            "vector3" -> Vector3Loader.readStream(stream, schema, errors)
+            "vector2" -> Vector2Loader.readStream(stream, schema, errors)
             else -> throw IllegalStateException("Non-vector stream requested : ${schema["type"]} is not vector")
         }
     }
