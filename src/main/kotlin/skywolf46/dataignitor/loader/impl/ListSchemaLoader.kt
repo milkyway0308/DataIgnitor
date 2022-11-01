@@ -5,7 +5,7 @@ import skywolf46.dataignitor.loader.SchemaDataLoader
 import skywolf46.dataignitor.util.YamlReader
 import java.io.DataInputStream
 
-class ListSchemaLoader : SchemaDataLoader<List<Any>> {
+object ListSchemaLoader : SchemaDataLoader<List<Any>> {
     override fun readStream(
         stream: DataInputStream,
         schema: YamlReader.YamlSection,
