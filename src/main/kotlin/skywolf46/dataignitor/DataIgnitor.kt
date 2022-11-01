@@ -1,10 +1,18 @@
 package skywolf46.dataignitor
 
+import org.yaml.snakeyaml.DumperOptions
+import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.representer.Representer
 import skywolf46.dataignitor.cache.ResourceCacheDownloader
+import skywolf46.dataignitor.data.SchemaErrorInfo
 import skywolf46.dataignitor.data.SharedResourceIndex
+import skywolf46.dataignitor.data.StaticDataSchema
+import skywolf46.dataignitor.loader.SchemaDataLoader
 import skywolf46.dataignitor.util.CommandLineParser
 import skywolf46.dataignitor.util.DataSizeUtil
+import skywolf46.dataignitor.util.YamlReader
 import skywolf46.dataignitor.util.printError
+import java.io.DataInputStream
 import java.io.File
 import java.util.Properties
 import kotlin.system.exitProcess
@@ -110,6 +118,11 @@ object DataIgnitor {
                 println("Safety lock released")
                 println("CAUTION: This operation can cause critical error to local machine")
             }
+            .registerAction("output", "opt") {
+                when (it[0].lowercase()) {
+
+                }
+            }
     }
 
 
@@ -165,6 +178,7 @@ object DataIgnitor {
 
     private fun initialize() {
         println("-- Initializing")
+        SchemaDataLoader.init()
         createCacheFolder()
         parseIndexFile()
     }
@@ -208,9 +222,37 @@ object DataIgnitor {
         ResourceCacheDownloader.downloadIfNotExists(server, fileIndexes[targetFileName]!!, cacheLocation, fileBuffer)
         if (schemaFileName != null) {
             println("Downloading schema file..")
-            ResourceCacheDownloader.downloadIfNotExists(server, fileIndexes[schemaFileName]!!, cacheLocation, fileBuffer)
+            ResourceCacheDownloader.downloadIfNotExists(
+                server,
+                fileIndexes[schemaFileName]!!,
+                cacheLocation,
+                fileBuffer
+            )
+            fileIndexes[schemaFileName]!!.toSubDirectory(cacheLocation).inputStream().use {
+                println(YamlReader(it).root.getKeys(true))
+            }
         }
         println("Starting data process for target file \"$targetFileName\"")
+        val index = fileIndexes[targetFileName]!!
+        val schema = fileIndexes[schemaFileName]
+        val errLog = SchemaErrorInfo(null, null)
+        index.toSubDirectory(cacheLocation).inputStream().use {
+            index.toSubDirectory(cacheLocation, ".yml").writeText(
+                Yaml(Representer(DumperOptions().apply {
+                    this.defaultFlowStyle = DumperOptions.FlowStyle.FLOW
+                })).dump(
+                    schema?.toSubDirectory(cacheLocation)?.inputStream()?.use { yamlStream ->
+                        StaticDataSchema.fromSchemaYaml(YamlReader(yamlStream).root, it, errLog)
+                    } ?: StaticDataSchema.fromFileStream(it, errLog)
+                )
+            )
+        }
+        for (x in errLog) {
+            printError("$x: $errLog")
+        }
+        println("Completed with ${errLog.size} errors")
+
+
     }
 
 
