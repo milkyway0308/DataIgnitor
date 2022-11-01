@@ -3,15 +3,16 @@ package skywolf46.dataignitor.loader.impl
 import skywolf46.dataignitor.data.SchemaErrorInfo
 import skywolf46.dataignitor.loader.SchemaDataLoader
 import skywolf46.dataignitor.util.YamlReader
+import skywolf46.dataignitor.util.readCInt32
 import java.io.DataInputStream
 import java.util.NoSuchElementException
 
 object EnumLoader : SchemaDataLoader<String> {
     override fun readStream(stream: DataInputStream, schema: YamlReader.YamlSection, errors: SchemaErrorInfo): String {
         val data = when (schema.getInt("size", 1)) {
-            1 -> stream.readByte()
+            1 -> stream.read()
             2 -> stream.readShort()
-            4 -> stream.readInt()
+            4 -> stream.readCInt32()
             else -> throw IllegalStateException(
                 "Byte size ${
                     schema.getInt(
