@@ -50,8 +50,10 @@ object IntLoader : SchemaDataLoader<NumberContainer<Int>> {
     }
 
     private fun checkUnsigned(data: Int, schema: YamlReader.YamlSection): NumberContainer<Int> {
-        if (isUnsignedMin(schema) || isUnsignedExclusiveMin(schema))
+        if (isUnsignedMin(schema) || isUnsignedExclusiveMin(schema)) {
+            println("Schema is unsigned : ${data.toLong() and 0xffffffffL}")
             return NumberContainer(data, data.toUInt())
+        }
         return NumberContainer(data, null)
     }
 
