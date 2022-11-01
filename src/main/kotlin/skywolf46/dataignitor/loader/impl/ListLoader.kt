@@ -5,7 +5,7 @@ import skywolf46.dataignitor.loader.SchemaDataLoader
 import skywolf46.dataignitor.util.YamlReader
 import java.io.DataInputStream
 
-object ListSchemaLoader : SchemaDataLoader<List<Any>> {
+object ListLoader : SchemaDataLoader<List<Any>> {
     override fun readStream(
         stream: DataInputStream,
         schema: YamlReader.YamlSection,
@@ -20,20 +20,15 @@ object ListSchemaLoader : SchemaDataLoader<List<Any>> {
         errors: SchemaErrorInfo
     ): List<Any> {
         val isFixedLength = schema.contains("length")
-        val length = if (schema.contains("length")) schema.getInt("length") else stream.readInt()
+//        val length = if (schema.contains("length")) schema.getInt("length").toLong() else (stream.readInt().toLong() and 0xffffffffL)
         val itemSchema = schema.getSection("itemTypes")!!
         val itemSize = itemSchema.getInt("size")
         val lst = mutableListOf<Any>()
-        for (x in itemSchema.getKeys(false)) {
-            if (!itemSchema.isSection(x)) {
-                errors.addSchemaError(
-                    "${itemSchema.nodeName}.$x",
-                    "Cannot represent list item : Schema target is not section"
-                )
-                continue
-            }
-            lst += SchemaDataLoader.represent<Any>(stream, itemSchema.getSection(x)!!, errors)
+        println("$itemSize bytes")
+        for (x in 0L until itemSize) {
+            lst += SchemaDataLoader.represent<Any>(stream, itemSchema, errors)
         }
+        println(lst)
         return lst
     }
 
