@@ -6,21 +6,10 @@ import java.io.DataInputStream
 
 interface SchemaDataLoader<T : Any> {
     companion object {
-        fun <T : Any> of(cls: Class<out T>): SchemaDataLoader<T> {
-            return TODO()
-        }
+        private val schemas = mutableMapOf<String, SchemaDataLoader<*>>()
 
         fun <T : Any> of(key: String): SchemaDataLoader<T> {
             return TODO()
-        }
-
-        fun <T : Any> parse(
-            deserializeTo: Class<T>,
-            stream: DataInputStream,
-            section: YamlReader.YamlSection,
-            errors: SchemaErrorInfo
-        ): T {
-            return of(deserializeTo).readStream(stream, section, errors)
         }
 
         fun <T : Any> parse(
