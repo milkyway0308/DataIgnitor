@@ -6,7 +6,6 @@ import skywolf46.dataignitor.util.YamlReader
 import java.io.DataInputStream
 
 class ListSchemaLoader : SchemaDataLoader<List<Any>> {
-
     override fun readStream(
         stream: DataInputStream,
         schema: YamlReader.YamlSection,
@@ -14,7 +13,6 @@ class ListSchemaLoader : SchemaDataLoader<List<Any>> {
     ): List<Any> {
         return loadFixedList(stream, schema, errors)
     }
-
 
     private fun loadFixedList(
         stream: DataInputStream,
