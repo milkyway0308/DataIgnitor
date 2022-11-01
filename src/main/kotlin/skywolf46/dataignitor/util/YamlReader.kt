@@ -57,6 +57,11 @@ class YamlReader(stream: InputStream) {
         }
 
         @JvmOverloads
+        operator fun get(key: String, def: String? = null): String? {
+            return getRaw<Any>(key)?.toString() ?: def
+        }
+
+        @JvmOverloads
         fun getInt(key: String, def: Int = 0): Int {
             return (data[key] as? Number)?.toInt() ?: def
         }
