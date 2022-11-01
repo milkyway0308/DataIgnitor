@@ -1,5 +1,6 @@
 package skywolf46.dataignitor.loader.impl
 
+import skywolf46.dataignitor.data.SchemaErrorInfo
 import skywolf46.dataignitor.data.eve.*
 import skywolf46.dataignitor.loader.SchemaDataLoader
 import skywolf46.dataignitor.util.YamlReader
@@ -8,7 +9,11 @@ import java.io.DataInputStream
 private const val ALIAS = "aliases"
 
 object Vector3Loader : SchemaDataLoader<LocationVector<out Number>> {
-    override fun readStream(stream: DataInputStream, schema: YamlReader.YamlSection): LocationVector<out Number> {
+    override fun readStream(
+        stream: DataInputStream,
+        schema: YamlReader.YamlSection,
+        errors: SchemaErrorInfo
+    ): LocationVector<out Number> {
         if (schema.contains(ALIAS) && schema.isSection(ALIAS)) {
             return loadFromAlias(stream, schema)
         }
