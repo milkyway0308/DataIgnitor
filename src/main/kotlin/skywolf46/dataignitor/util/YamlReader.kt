@@ -7,7 +7,7 @@ import kotlin.reflect.KClass
 
 @Suppress("unused", "UNCHECKED_CAST", "MemberVisibilityCanBePrivate")
 class YamlReader(stream: InputStream) {
-    val root = YamlSection(Yaml().load(stream))
+    val root = YamlSection("", Yaml().load(stream))
 
     open class YamlSection internal constructor(
         val nodeName: String, private val data: MutableMap<String, Any> = HashMap()
