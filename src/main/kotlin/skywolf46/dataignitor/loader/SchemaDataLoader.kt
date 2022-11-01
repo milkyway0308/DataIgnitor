@@ -1,9 +1,8 @@
 package skywolf46.dataignitor.loader
 
-import skywolf46.dataignitor.exceptions.InvalidSchemaException
+import skywolf46.dataignitor.data.SchemaErrorInfo
 import skywolf46.dataignitor.util.YamlReader
 import java.io.DataInputStream
-import java.io.InputStream
 
 interface SchemaDataLoader<T : Any> {
     companion object {
@@ -15,14 +14,24 @@ interface SchemaDataLoader<T : Any> {
             return TODO()
         }
 
-        fun <T : Any> parse(deserializeTo: Class<T>, stream: DataInputStream, section: YamlReader.YamlSection): T {
-            return of(deserializeTo).readStream(stream, section)
+        fun <T : Any> parse(
+            deserializeTo: Class<T>,
+            stream: DataInputStream,
+            section: YamlReader.YamlSection,
+            errors: SchemaErrorInfo
+        ): T {
+            return of(deserializeTo).readStream(stream, section, errors)
         }
 
-        fun <T : Any> parse(key: String, stream: DataInputStream, section: YamlReader.YamlSection): T {
-            return of<T>(key).readStream(stream, section)
+        fun <T : Any> parse(
+            key: String,
+            stream: DataInputStream,
+            section: YamlReader.YamlSection,
+            errors: SchemaErrorInfo
+        ): T {
+            return of<T>(key).readStream(stream, section, errors)
         }
     }
 
-    fun readStream(stream: DataInputStream, schema: YamlReader.YamlSection): T
+    fun readStream(stream: DataInputStream, schema: YamlReader.YamlSection, errors: SchemaErrorInfo): T
 }
