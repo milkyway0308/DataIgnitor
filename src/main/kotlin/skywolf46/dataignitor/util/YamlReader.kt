@@ -9,7 +9,9 @@ import kotlin.reflect.KClass
 class YamlReader(stream: InputStream) {
     val root = YamlSection(Yaml().load(stream))
 
-    open class YamlSection internal constructor(private val data: MutableMap<String, Any> = HashMap()) {
+    open class YamlSection internal constructor(
+        val nodeName: String, private val data: MutableMap<String, Any> = HashMap()
+    ) {
         init {
             fixDataTypes()
         }
@@ -17,8 +19,13 @@ class YamlReader(stream: InputStream) {
         private fun fixDataTypes() {
             data.entries.toList().forEach {
                 when (it.value) {
-                    is Map<*, *> -> data[it.key] = YamlSection(it.value as MutableMap<String, Any>)
-                    is List<*> -> data[it.key] = YamlList(it.value as MutableList<Any>)
+                    is Map<*, *> -> data[it.key] = YamlSection(
+                        if (nodeName.isEmpty()) it.key else "$nodeName.${it.key}", it.value as MutableMap<String, Any>
+                    )
+
+                    is List<*> -> data[it.key] = YamlList(
+                        if (nodeName.isEmpty()) it.key else "$nodeName.${it.key}", it.value as MutableList<Any>
+                    )
                 }
             }
         }
@@ -91,24 +98,23 @@ class YamlReader(stream: InputStream) {
 
         @JvmOverloads
         fun getKeys(deepScan: Boolean = false): List<String> {
-            if (!deepScan)
-                return data.keys.toList()
+            if (!deepScan) return data.keys.toList()
             return data.keys.toList() + data.entries.filter { it.value is YamlSection }
-                .map { (it.value as YamlSection).getKeys(true).map { x -> "${it.key}.$x" } }
-                .flatten()
+                .map { (it.value as YamlSection).getKeys(true).map { x -> "${it.key}.$x" } }.flatten()
         }
 
         @JvmOverloads
         fun getEntries(deepScan: Boolean = false): List<Pair<String, Any>> {
-            if (!deepScan)
-                return data.entries.map { (x, y) -> x to y }
+            if (!deepScan) return data.entries.map { (x, y) -> x to y }
             return data.entries.map { (x, y) -> x to y } + data.entries.filter { it.value is YamlSection }
                 .map { (it.value as YamlSection).getEntries(true).map { x -> "${it.key}.${x.first}" to x.second } }
                 .flatten()
         }
     }
 
-    class YamlList internal constructor(private val data: MutableList<Any> = mutableListOf()) {
+    class YamlList internal constructor(
+        private val nodeName: String, private val data: MutableList<Any> = mutableListOf()
+    ) {
         init {
             fixDataTypes()
         }
@@ -116,8 +122,12 @@ class YamlReader(stream: InputStream) {
         private fun fixDataTypes() {
             data.indices.forEach {
                 when (val next = data[it]) {
-                    is Map<*, *> -> data[it] = YamlSection(next as MutableMap<String, Any>)
-                    is List<*> -> data[it] = YamlList(next as MutableList<Any>)
+                    is Map<*, *> -> data[it] = YamlSection(
+                        if (nodeName.isEmpty()) it.toString() else "$nodeName.${it}", next as MutableMap<String, Any>
+                    )
+
+                    is List<*> -> data[it] =
+                        YamlList(if (nodeName.isEmpty()) it.toString() else "$nodeName.${it}", next as MutableList<Any>)
                 }
             }
         }
