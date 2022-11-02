@@ -23,7 +23,6 @@ object ObjectLoader : SchemaDataLoader<YamlWrapper.YamlSection> {
                 continue
             }
             map[x] = SchemaDataLoader.represent(stream, attributeSchema.getSection(x)!!, errors)
-            println("Loaded $x (${map[x]})")
         }
         return map
     }
