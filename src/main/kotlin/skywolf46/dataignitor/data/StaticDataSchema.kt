@@ -9,7 +9,7 @@ import java.io.InputStream
 open class StaticDataSchema {
     companion object {
         fun fromSchemaYaml(yaml: YamlWrapper.YamlSection, fsdStream: InputStream, errorInfo: SchemaErrorInfo): Any {
-            return SchemaDataLoader.represent<Any>(DataInputStream(fsdStream), yaml, errorInfo)
+            return SchemaDataLoader.represent(DataInputStream(fsdStream), yaml, errorInfo)
         }
 
         fun fromFileStream(stream: InputStream, errorInfo: SchemaErrorInfo): Any {
