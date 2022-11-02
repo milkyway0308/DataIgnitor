@@ -22,4 +22,5 @@ data class NumberContainer<T : Number>(val data: T, val unsignedData: Any?) {
         result = 31 * result + (unsignedData?.hashCode() ?: 0)
         return result
     }
+
 }

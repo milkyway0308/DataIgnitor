@@ -2,7 +2,7 @@ package skywolf46.dataignitor.loader
 
 import skywolf46.dataignitor.data.SchemaErrorInfo
 import skywolf46.dataignitor.loader.impl.*
-import skywolf46.dataignitor.util.YamlReader
+import skywolf46.dataignitor.util.YamlWrapper
 import java.io.DataInputStream
 
 interface SchemaDataLoader<T : Any> {
@@ -23,13 +23,13 @@ interface SchemaDataLoader<T : Any> {
         fun <T : Any> parse(
             key: String,
             stream: DataInputStream,
-            section: YamlReader.YamlSection,
+            section: YamlWrapper.YamlSection,
             errors: SchemaErrorInfo
         ): T {
             return of<T>(key).readStream(stream, section, errors)
         }
 
-        fun <T : Any> represent(stream: DataInputStream, section: YamlReader.YamlSection, errors: SchemaErrorInfo): T {
+        fun <T : Any> represent(stream: DataInputStream, section: YamlWrapper.YamlSection, errors: SchemaErrorInfo): T {
             return parse(section["type"]!!, stream, section, errors)
         }
 
@@ -71,5 +71,5 @@ interface SchemaDataLoader<T : Any> {
         }
     }
 
-    fun readStream(stream: DataInputStream, schema: YamlReader.YamlSection, errors: SchemaErrorInfo): T
+    fun readStream(stream: DataInputStream, schema: YamlWrapper.YamlSection, errors: SchemaErrorInfo): T
 }
