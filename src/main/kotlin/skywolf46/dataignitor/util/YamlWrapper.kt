@@ -1,17 +1,52 @@
 package skywolf46.dataignitor.util
 
+import org.yaml.snakeyaml.DumperOptions
 import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.representer.Representer
+import java.io.File
 import java.io.InputStream
 import kotlin.reflect.KClass
 
 @Suppress("unused", "UNCHECKED_CAST", "MemberVisibilityCanBePrivate")
 class YamlWrapper(stream: InputStream) {
+    companion object {
+        fun isYamlWritable(data: Any): Boolean {
+            return data is Number || data is String || data is YamlSerializable
+        }
+    }
+
     val yaml = Yaml()
     val root = YamlSection("", Yaml().load(stream))
 
+    interface YamlExportable {
+        fun saveToString(): String
+        fun saveToFile(file: File) {
+            if (!file.exists()) {
+                file.parentFile.mkdirs()
+                file.createNewFile()
+            }
+            file.bufferedWriter().use {
+                it.write(saveToString())
+            }
+        }
+    }
+
+    interface YamlSerializable {
+        fun serialize(): Any
+    }
+
+    abstract class MappedYamlSerializable : YamlSerializable {
+        override fun serialize(): Any {
+            return serializeAsMap()
+        }
+
+        protected abstract fun serializeAsMap(): Map<String, Any>
+    }
+
+
     open class YamlSection internal constructor(
-        val nodeName: String, private val data: MutableMap<String, Any> = HashMap()
-    ) {
+        val nodeName: String = "", private val data: MutableMap<String, Any> = HashMap()
+    ) : MappedYamlSerializable(), YamlExportable {
         init {
             fixDataTypes()
         }
@@ -28,6 +63,17 @@ class YamlWrapper(stream: InputStream) {
                     )
                 }
             }
+        }
+
+        operator fun set(key: String, value: Any?): YamlSection {
+            if (value == null)
+                data.remove(key)
+            else {
+                if (!isYamlWritable(key))
+                    throw IllegalStateException("Cannot serialize ${value.javaClass.name} : Class is not primitive and YamlSerializable")
+                data[key] = value
+            }
+            return this
         }
 
         operator fun contains(key: String): Boolean {
@@ -110,34 +156,59 @@ class YamlWrapper(stream: InputStream) {
                 .map { (it.value as YamlSection).getEntries(true).map { x -> "${it.key}.${x.first}" to x.second } }
                 .flatten()
         }
+
+        override fun serializeAsMap(): Map<String, Any> {
+            return data.mapValues { if (it.value is YamlSerializable) (it.value as YamlSerializable).serialize() else it.value }
+        }
+
+        override fun saveToString(): String {
+            return Yaml(Representer(DumperOptions().apply {
+                this.defaultFlowStyle = DumperOptions.FlowStyle.FLOW
+            })).dump(serialize())
+        }
     }
 
     class YamlList internal constructor(
-        private val nodeName: String, private val data: MutableList<Any> = mutableListOf()
-    ) {
+        private val nodeName: String = "", private val list: MutableList<Any> = mutableListOf()
+    ) : YamlSerializable, YamlExportable {
         init {
             fixDataTypes()
         }
 
+        operator fun plus(data: Any): YamlList {
+            return add(data)
+        }
+
+        operator fun plusAssign(data: Any) {
+            add(data)
+        }
+
+        fun add(data: Any): YamlList {
+            if (!isYamlWritable(data))
+                throw IllegalStateException("Cannot serialize ${data.javaClass.name} : Class is not primitive and YamlSerializable")
+            list.add(data)
+            return this
+        }
+
         private fun fixDataTypes() {
-            data.indices.forEach {
-                when (val next = data[it]) {
-                    is Map<*, *> -> data[it] = YamlSection(
+            list.indices.forEach {
+                when (val next = list[it]) {
+                    is Map<*, *> -> list[it] = YamlSection(
                         if (nodeName.isEmpty()) it.toString() else "$nodeName.${it}", next as MutableMap<String, Any>
                     )
 
-                    is List<*> -> data[it] =
+                    is List<*> -> list[it] =
                         YamlList(if (nodeName.isEmpty()) it.toString() else "$nodeName.${it}", next as MutableList<Any>)
                 }
             }
         }
 
         fun size(): Int {
-            return data.size
+            return list.size
         }
 
         fun <T : Any> get(index: Int): T? {
-            return (if (index < 0 || index >= data.size) null else data[index]) as T?
+            return (if (index < 0 || index >= list.size) null else list[index]) as T?
         }
 
         @JvmOverloads
@@ -158,6 +229,16 @@ class YamlWrapper(stream: InputStream) {
         @JvmOverloads
         fun getFloat(index: Int, default: Float = 0f): Float {
             return get<Number>(index)?.toFloat() ?: default
+        }
+
+        override fun serialize(): List<Any> {
+            return list.map { if (it is YamlSerializable) it.serialize() else it }
+        }
+
+        override fun saveToString(): String {
+            return Yaml(Representer(DumperOptions().apply {
+                this.defaultFlowStyle = DumperOptions.FlowStyle.FLOW
+            })).dump(serialize())
         }
 
     }
