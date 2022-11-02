@@ -5,13 +5,13 @@ import skywolf46.dataignitor.loader.SchemaDataLoader
 import skywolf46.dataignitor.util.YamlWrapper
 import java.io.DataInputStream
 
-object DictLoader : SchemaDataLoader<Map<String, Any>> {
+object DictLoader : SchemaDataLoader<YamlWrapper.YamlSection> {
     override fun readStream(
         stream: DataInputStream,
         schema: YamlWrapper.YamlSection,
         errors: SchemaErrorInfo
-    ): Map<String, Any> {
-        val map = mutableMapOf<String, Any>()
+    ): YamlWrapper.YamlSection {
+        val map = YamlWrapper.YamlSection()
         val dataSize = stream.readInt()
         val footerSize = stream.readInt()
         val valueSchema = schema.getSection("valueTypes")!!
