@@ -3,7 +3,7 @@ package skywolf46.dataignitor.loader.impl
 import skywolf46.dataignitor.data.NumberContainer
 import skywolf46.dataignitor.data.SchemaErrorInfo
 import skywolf46.dataignitor.loader.SchemaDataLoader
-import skywolf46.dataignitor.util.YamlReader
+import skywolf46.dataignitor.util.YamlWrapper
 import skywolf46.dataignitor.util.readCInt32
 import java.io.DataInputStream
 
@@ -15,7 +15,7 @@ const val VALIDATE_EXCLUSIVE_MAX = "exclusiveMax"
 object IntLoader : SchemaDataLoader<NumberContainer<Int>> {
     override fun readStream(
         stream: DataInputStream,
-        schema: YamlReader.YamlSection,
+        schema: YamlWrapper.YamlSection,
         errors: SchemaErrorInfo
     ): NumberContainer<Int> {
         val data = stream.readCInt32()
@@ -23,7 +23,7 @@ object IntLoader : SchemaDataLoader<NumberContainer<Int>> {
         return checkUnsigned(data, schema)
     }
 
-    private fun validate(data: Int, schema: YamlReader.YamlSection, errors: SchemaErrorInfo) {
+    private fun validate(data: Int, schema: YamlWrapper.YamlSection, errors: SchemaErrorInfo) {
         if (schema.contains(VALIDATE_MIN) && data < schema.getInt(VALIDATE_MIN)) {
             errors.addSchemaError(
                 schema.nodeName,
@@ -50,17 +50,17 @@ object IntLoader : SchemaDataLoader<NumberContainer<Int>> {
         }
     }
 
-    private fun checkUnsigned(data: Int, schema: YamlReader.YamlSection): NumberContainer<Int> {
+    private fun checkUnsigned(data: Int, schema: YamlWrapper.YamlSection): NumberContainer<Int> {
         if (isUnsignedMin(schema) || isUnsignedExclusiveMin(schema)) {
             return NumberContainer(data, data.toUInt())
         }
         return NumberContainer(data, null)
     }
 
-    private fun isUnsignedMin(schema: YamlReader.YamlSection) =
+    private fun isUnsignedMin(schema: YamlWrapper.YamlSection) =
         (VALIDATE_MIN in schema && schema.getInt(VALIDATE_MIN) >= 0)
 
 
-    private fun isUnsignedExclusiveMin(schema: YamlReader.YamlSection) =
+    private fun isUnsignedExclusiveMin(schema: YamlWrapper.YamlSection) =
         (VALIDATE_EXCLUSIVE_MIN in schema && schema.getInt(VALIDATE_EXCLUSIVE_MIN) >= -1)
 }
