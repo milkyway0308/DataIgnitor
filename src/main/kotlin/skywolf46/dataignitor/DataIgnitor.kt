@@ -227,9 +227,6 @@ object DataIgnitor {
                 cacheLocation,
                 fileBuffer
             )
-            fileIndexes[schemaFileName]!!.toSubDirectory(cacheLocation).inputStream().use {
-                println(YamlWrapper(it).root.getKeys(true))
-            }
         }
         println("Starting data process for target file \"$targetFileName\"")
         val index = fileIndexes[targetFileName]!!
