@@ -10,9 +10,8 @@ import skywolf46.dataignitor.data.StaticDataSchema
 import skywolf46.dataignitor.loader.SchemaDataLoader
 import skywolf46.dataignitor.util.CommandLineParser
 import skywolf46.dataignitor.util.DataSizeUtil
-import skywolf46.dataignitor.util.YamlReader
+import skywolf46.dataignitor.util.YamlWrapper
 import skywolf46.dataignitor.util.printError
-import java.io.DataInputStream
 import java.io.File
 import java.util.Properties
 import kotlin.system.exitProcess
@@ -229,7 +228,7 @@ object DataIgnitor {
                 fileBuffer
             )
             fileIndexes[schemaFileName]!!.toSubDirectory(cacheLocation).inputStream().use {
-                println(YamlReader(it).root.getKeys(true))
+                println(YamlWrapper(it).root.getKeys(true))
             }
         }
         println("Starting data process for target file \"$targetFileName\"")
@@ -242,7 +241,7 @@ object DataIgnitor {
                     this.defaultFlowStyle = DumperOptions.FlowStyle.FLOW
                 })).dump(
                     schema?.toSubDirectory(cacheLocation)?.inputStream()?.use { yamlStream ->
-                        StaticDataSchema.fromSchemaYaml(YamlReader(yamlStream).root, it, errLog)
+                        StaticDataSchema.fromSchemaYaml(YamlWrapper(yamlStream).root, it, errLog)
                     } ?: StaticDataSchema.fromFileStream(it, errLog)
                 )
             )

@@ -2,13 +2,13 @@ package skywolf46.dataignitor.loader.impl
 
 import skywolf46.dataignitor.data.SchemaErrorInfo
 import skywolf46.dataignitor.loader.SchemaDataLoader
-import skywolf46.dataignitor.util.YamlReader
+import skywolf46.dataignitor.util.YamlWrapper
 import java.io.DataInputStream
 
 object DictLoader : SchemaDataLoader<Map<String, Any>> {
     override fun readStream(
         stream: DataInputStream,
-        schema: YamlReader.YamlSection,
+        schema: YamlWrapper.YamlSection,
         errors: SchemaErrorInfo
     ): Map<String, Any> {
         val map = mutableMapOf<String, Any>()

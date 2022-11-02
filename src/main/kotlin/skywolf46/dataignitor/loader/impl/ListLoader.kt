@@ -2,14 +2,14 @@ package skywolf46.dataignitor.loader.impl
 
 import skywolf46.dataignitor.data.SchemaErrorInfo
 import skywolf46.dataignitor.loader.SchemaDataLoader
-import skywolf46.dataignitor.util.YamlReader
+import skywolf46.dataignitor.util.YamlWrapper
 import skywolf46.dataignitor.util.readCInt32
 import java.io.DataInputStream
 
 object ListLoader : SchemaDataLoader<List<Any>> {
     override fun readStream(
         stream: DataInputStream,
-        schema: YamlReader.YamlSection,
+        schema: YamlWrapper.YamlSection,
         errors: SchemaErrorInfo
     ): List<Any> {
         return loadFixedList(stream, schema, errors)
@@ -17,18 +17,18 @@ object ListLoader : SchemaDataLoader<List<Any>> {
 
     private fun loadFixedList(
         stream: DataInputStream,
-        schema: YamlReader.YamlSection,
+        schema: YamlWrapper.YamlSection,
         errors: SchemaErrorInfo
     ): List<Any> {
         val isFixedLength = schema.contains("length")
-        val length = if (schema.contains("length")) schema.getInt("length").toLong() else (stream.readCInt32())
+        val length = if (schema.contains("length")) schema.getInt("length") else (stream.readCInt32())
         val itemSchema = schema.getSection("itemTypes")!!
         val itemSize = itemSchema.getInt("size")
         val lst = mutableListOf<Any>()
-        for (x in 0L until itemSize) {
+        for (x in 0 until length) {
             lst += SchemaDataLoader.represent<Any>(stream, itemSchema, errors)
         }
-        println(lst)
+        println("List: ${lst.size}")
         return lst
     }
 
