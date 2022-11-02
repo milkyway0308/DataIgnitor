@@ -236,22 +236,16 @@ object DataIgnitor {
         val schema = fileIndexes[schemaFileName]
         val errLog = SchemaErrorInfo(null, null)
         index.toSubDirectory(cacheLocation).inputStream().use {
-            index.toSubDirectory(cacheLocation, ".yml").writeText(
-                Yaml(Representer(DumperOptions().apply {
-                    this.defaultFlowStyle = DumperOptions.FlowStyle.FLOW
-                })).dump(
-                    schema?.toSubDirectory(cacheLocation)?.inputStream()?.use { yamlStream ->
-                        StaticDataSchema.fromSchemaYaml(YamlWrapper(yamlStream).root, it, errLog)
-                    } ?: StaticDataSchema.fromFileStream(it, errLog)
-                )
+            ((schema?.toSubDirectory(cacheLocation)?.inputStream()?.use { yamlStream ->
+                StaticDataSchema.fromSchemaYaml(YamlWrapper(yamlStream).root, it, errLog)
+            } ?: StaticDataSchema.fromFileStream(it, errLog)) as YamlWrapper.YamlExportable).saveToFile(
+                index.toSubDirectory(cacheLocation, ".yml")
             )
         }
         for (x in errLog) {
             printError("$x: $errLog")
         }
         println("Completed with ${errLog.size} errors")
-
-
     }
 
 
