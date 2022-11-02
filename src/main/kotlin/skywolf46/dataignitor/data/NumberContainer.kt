@@ -1,6 +1,8 @@
 package skywolf46.dataignitor.data
 
-data class NumberContainer<T : Number>(val data: T, val unsignedData: Any?) {
+import skywolf46.dataignitor.util.YamlWrapper
+
+data class NumberContainer<T : Number>(val data: T, val unsignedData: Any?) : YamlWrapper.YamlSerializable {
     override fun toString(): String {
         return unsignedData?.toString() ?: data.toString()
     }
@@ -23,4 +25,7 @@ data class NumberContainer<T : Number>(val data: T, val unsignedData: Any?) {
         return result
     }
 
+    override fun serialize(): Any {
+        return unsignedData?.toString() ?: data.toString()
+    }
 }
