@@ -2,11 +2,11 @@ package skywolf46.dataignitor.util
 
 import org.yaml.snakeyaml.Yaml
 import java.io.InputStream
-import java.util.StringJoiner
 import kotlin.reflect.KClass
 
 @Suppress("unused", "UNCHECKED_CAST", "MemberVisibilityCanBePrivate")
-class YamlReader(stream: InputStream) {
+class YamlWrapper(stream: InputStream) {
+    val yaml = Yaml()
     val root = YamlSection("", Yaml().load(stream))
 
     open class YamlSection internal constructor(
