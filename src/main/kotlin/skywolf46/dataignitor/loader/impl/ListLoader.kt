@@ -30,6 +30,4 @@ object ListLoader : SchemaDataLoader<YamlWrapper.YamlList> {
         }
         return lst
     }
-
-
 }
