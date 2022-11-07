@@ -55,9 +55,11 @@ class YamlWrapper(stream: InputStream) {
             data.entries.toList().forEach {
                 when (it.value) {
                     is Map<*, *> -> data[it.key] = YamlSection(
-                        if (nodeName.isEmpty()) it.key else "$nodeName.${it.key}", it.value as MutableMap<String, Any>
+                        if (nodeName.isEmpty()) it.key else "$nodeName.${it.key}",
+                        (it.value as MutableMap<Any, Any>).mapKeysTo(
+                            mutableMapOf()
+                        ) { entry -> entry.key.toString() }
                     )
-
                     is List<*> -> data[it.key] = YamlList(
                         if (nodeName.isEmpty()) it.key else "$nodeName.${it.key}", it.value as MutableList<Any>
                     )
@@ -167,7 +169,9 @@ class YamlWrapper(stream: InputStream) {
 
         @JvmOverloads
         fun getEntries(deepScan: Boolean = false): List<Pair<String, Any>> {
-            if (!deepScan) return data.entries.map { (x, y) -> x to y }
+            if (!deepScan) {
+                return data.entries.map { (x, y) -> x to y }
+            }
             return data.entries.map { (x, y) -> x to y } + data.entries.filter { it.value is YamlSection }
                 .map { (it.value as YamlSection).getEntries(true).map { x -> "${it.key}.${x.first}" to x.second } }
                 .flatten()
@@ -223,7 +227,7 @@ class YamlWrapper(stream: InputStream) {
             return list.size
         }
 
-        operator fun get(index: Int) : String? {
+        operator fun get(index: Int): String? {
             return getRaw<Any>(index)?.toString()
         }
 
