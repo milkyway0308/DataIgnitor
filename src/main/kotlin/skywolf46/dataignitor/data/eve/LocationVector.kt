@@ -9,6 +9,12 @@ abstract class LocationVector<T : Number>(val size: Int, vararg data: T) : YamlW
     private val indexKey = mutableListOf<Pair<String, Int>>()
     private val priority = mutableListOf<Int>()
 
+    init {
+        for (x in dimension.indices) {
+            dimension[x] = data[x]
+        }
+    }
+
     constructor(vararg data: T) : this(data.size, *data)
 
     fun get(index: Int) = dimension[index] as T
