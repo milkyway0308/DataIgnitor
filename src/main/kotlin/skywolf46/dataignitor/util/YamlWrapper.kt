@@ -115,6 +115,22 @@ class YamlWrapper(stream: InputStream) {
         }
 
         @JvmOverloads
+        fun getByContinuity(key: String, def: String? = null): String? {
+            return getByContinuity(key.split('.').apply {
+                if (isEmpty())
+                    return def
+            }, 0) ?: def
+        }
+
+        private fun getByContinuity(key: List<String>, index: Int): String? {
+            if (key.size == index + 1) {
+                return get(key[index])
+            }
+            return getSection(key[index])?.getByContinuity(key, index + 1)
+        }
+
+
+        @JvmOverloads
         fun getInt(key: String, def: Int = 0): Int {
             return (data[key] as? Number)?.toInt() ?: def
         }
@@ -207,28 +223,32 @@ class YamlWrapper(stream: InputStream) {
             return list.size
         }
 
-        fun <T : Any> get(index: Int): T? {
+        operator fun get(index: Int) : String? {
+            return getRaw<Any>(index)?.toString()
+        }
+
+        fun <T : Any> getRaw(index: Int): T? {
             return (if (index < 0 || index >= list.size) null else list[index]) as T?
         }
 
         @JvmOverloads
         fun getInt(index: Int, default: Int = 0): Int {
-            return get<Number>(index)?.toInt() ?: default
+            return getRaw<Number>(index)?.toInt() ?: default
         }
 
         @JvmOverloads
         fun getLong(index: Int, default: Long = 0L): Long {
-            return get<Number>(index)?.toLong() ?: default
+            return getRaw<Number>(index)?.toLong() ?: default
         }
 
         @JvmOverloads
         fun getDouble(index: Int, default: Double = 0.0): Double {
-            return get<Number>(index)?.toDouble() ?: default
+            return getRaw<Number>(index)?.toDouble() ?: default
         }
 
         @JvmOverloads
         fun getFloat(index: Int, default: Float = 0f): Float {
-            return get<Number>(index)?.toFloat() ?: default
+            return getRaw<Number>(index)?.toFloat() ?: default
         }
 
         override fun serialize(): List<Any> {
