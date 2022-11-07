@@ -239,8 +239,12 @@ object DataIgnitor {
                 index.toSubDirectory(cacheLocation, ".yml")
             )
         }
-        for (x in errLog) {
-            printError("$x: $errLog")
+        if (errLog.size <= 20) {
+            for (x in errLog) {
+                printError("$x: $errLog")
+            }
+        } else {
+            printError("Validation error occurred over threshold (${errLog.size} errors). Skipping error print.")
         }
         println("Completed with ${errLog.size} errors")
     }
