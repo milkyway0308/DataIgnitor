@@ -23,11 +23,11 @@ object DictLoader : SchemaDataLoader<YamlWrapper.YamlSection> {
         val footerStream = DataInputStream(ByteArrayInputStream(cachedData, dataSize - footerSize, footerSize))
         // isOptimized;
         val isIntKeySchema = schema.getSection("keyTypes")?.get("type") == "int"
-        val dataAmount = footerStream.readCInt32()
         if (isIntKeySchema) {
+            val dataAmount = footerStream.readCInt32()
             parseIntegerKeyMap(map, schema, dataStream, footerStream, errors, dataAmount)
         } else {
-            parseDataKeyMap(map, schema, dataStream, footerStream, errors, dataAmount)
+            parseDataKeyMap(map, schema, dataStream, footerStream, errors)
         }
         return map
     }
@@ -92,12 +92,16 @@ object DictLoader : SchemaDataLoader<YamlWrapper.YamlSection> {
         dataStream: DataInputStream,
         footerStream: DataInputStream,
         errors: SchemaErrorInfo,
-        amount: Int
     ) {
-        val footerData = ListLoader.readStream(footerStream, configuration.getSection("keyTypes")!!, errors)
+        val footerData = ListLoader.readStream(footerStream, configuration.getSection("keyFooter")!!, errors)
         val valueSchema = configuration.getSection("valueTypes")!!
-        for (x in 0 until amount) {
-            map[footerData[x]!!] = SchemaDataLoader.represent(dataStream, valueSchema, errors)
+        for (x in 0 until footerData.size()) {
+            val key = footerData.getRaw<Any>(x)!!
+            if (key is YamlWrapper.YamlSection) {
+                map[key["key"]!!] = SchemaDataLoader.represent(dataStream, valueSchema, errors)
+            } else {
+                map[key.toString()] = SchemaDataLoader.represent(dataStream, valueSchema, errors)
+            }
         }
     }
 
