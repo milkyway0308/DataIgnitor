@@ -4,6 +4,8 @@ import skywolf46.dataignitor.data.SchemaErrorInfo
 import skywolf46.dataignitor.data.eve.*
 import skywolf46.dataignitor.loader.SchemaDataLoader
 import skywolf46.dataignitor.util.YamlWrapper
+import skywolf46.dataignitor.util.readCDouble64
+import skywolf46.dataignitor.util.readCFloat32
 import java.io.DataInputStream
 
 private const val ALIAS = "aliases"
@@ -26,15 +28,14 @@ object Vector3Loader : SchemaDataLoader<LocationVector<out Number>> {
         return locVector
     }
 
-
     private fun loadFromStream(stream: DataInputStream, schema: YamlWrapper.YamlSection): LocationVector<out Number> {
         return if (schema["precision", "single"] == "single") Vector3Float(
-            stream.readFloat(), stream.readFloat(), stream.readFloat()
+            stream.readCFloat32(), stream.readCFloat32(), stream.readCFloat32()
         )
         else Vector3Double(
-            stream.readDouble(),
-            stream.readDouble(),
-            stream.readDouble(),
+            stream.readCDouble64(),
+            stream.readCDouble64(),
+            stream.readCDouble64(),
         )
     }
 }
