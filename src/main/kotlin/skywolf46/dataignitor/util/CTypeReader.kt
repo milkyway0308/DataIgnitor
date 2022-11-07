@@ -14,7 +14,7 @@ fun DataInputStream.readCFloat32() : Float {
     return java.lang.Float.intBitsToFloat(readCInt32())
 }
 
-fun DataInputStream.readCDouble32() : Double {
+fun DataInputStream.readCDouble64() : Double {
     return java.lang.Double.longBitsToDouble(readCLong32())
 }
 fun DataInputStream.readCLong32(): Long {
